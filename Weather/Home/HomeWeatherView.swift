@@ -5,6 +5,7 @@ class HomeWeatherView: UIView {
     private var cityNameLabel: UILabel = {
         let name = UILabel()
         name.text = ""
+        name.textColor = .white
         name.font = UIFont.systemFont(ofSize: 34)
         name.translatesAutoresizingMaskIntoConstraints = false
         return name
@@ -13,6 +14,7 @@ class HomeWeatherView: UIView {
     private var tempLabel: UILabel = {
         let temp = UILabel()
         temp.text = ""
+        temp.textColor = .white
         temp.font = UIFont.systemFont(ofSize: 100, weight: .regular)
         temp.translatesAutoresizingMaskIntoConstraints = false
         return temp
@@ -21,7 +23,7 @@ class HomeWeatherView: UIView {
     private var descriptionLabel: UILabel = {
         let description = UILabel()
         description.text = ""
-        description.textColor = UIColor.black.withAlphaComponent(0.5)
+        description.textColor = UIColor.white.withAlphaComponent(0.8)
         description.translatesAutoresizingMaskIntoConstraints = false
         return description
     }()
@@ -29,6 +31,7 @@ class HomeWeatherView: UIView {
     private var maxMinTempLabel: UILabel = {
         let maxmintemp = UILabel()
         maxmintemp.text = ""
+        maxmintemp.textColor = .white
         maxmintemp.translatesAutoresizingMaskIntoConstraints = false
         return maxmintemp
     }()

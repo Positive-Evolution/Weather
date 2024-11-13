@@ -15,7 +15,7 @@ class CityView: UIView {
         let time = UILabel()
         time.text = ""
         time.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        time.textColor = .white.withAlphaComponent(0.5)
+        time.textColor = .white.withAlphaComponent(0.8)
         time.translatesAutoresizingMaskIntoConstraints = false
         return time
     }()
@@ -24,7 +24,7 @@ class CityView: UIView {
         let description = UILabel()
         description.text = ""
         description.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        description.textColor = .white.withAlphaComponent(0.5)
+        description.textColor = .white.withAlphaComponent(0.8)
         description.translatesAutoresizingMaskIntoConstraints = false
         return description
     }()
