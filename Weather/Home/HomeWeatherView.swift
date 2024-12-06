@@ -67,7 +67,7 @@ class HomeWeatherView: UIView {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            cityNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 40),
+            cityNameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
             cityNameLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             tempLabel.topAnchor.constraint(equalTo: cityNameLabel.bottomAnchor, constant: 2),

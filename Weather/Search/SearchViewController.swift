@@ -1,4 +1,5 @@
 import UIKit
+import AVFoundation
 
 protocol SearchViewControllerDelegate: AnyObject {
     func citySelectedByUser(model: SearchModel)
@@ -8,15 +9,19 @@ class SearchViewController: UIViewController {
     
     weak var delegate: SearchViewControllerDelegate?
     
-    var isSearchBarEmpty: Bool {
-        return searchController.searchBar.text?.isEmpty ?? true
-    }
+    private var viewModel: SearchViewModel
     
     let searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search for a city or airport"
-        searchController.searchBar.backgroundColor = .systemCyan
+        searchController.searchBar.tintColor = .white
+        searchController.searchBar.searchTextField.backgroundColor = .black
+        searchController.searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "Search for a city or airport",
+            attributes: [.foregroundColor: UIColor.lightGray]
+        )
+        searchController.searchBar.searchTextField.textColor = .white
         return searchController
     }()
     
@@ -28,22 +33,13 @@ class SearchViewController: UIViewController {
         table.delegate = self
         table.rowHeight = 120
         table.separatorStyle = .none
-        table.backgroundColor = .systemCyan
+        table.backgroundColor = .black
         return table
     }()
     
-    private lazy var closeButton: UIButton = {
-        let btn = UIButton(type: .custom)
-        btn.setTitle("Close", for: .normal)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        return btn
-    }()
-    
-    private var viewModel: SearchViewModel
-    
+    // Инициализация с передачей `SearchViewModel`
     init(viewModel: SearchViewModel) {
         self.viewModel = viewModel
-        self.viewModel.getSearchData()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -53,24 +49,36 @@ class SearchViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(tableView)
+
+        overrideUserInterfaceStyle = .dark
+        setupNavigationBar()
+        setupTableView()
+        setupSearchController()
         
         viewModel.delegate = self
-        
-        searchController.searchBar.delegate = self
-        searchController.searchResultsUpdater = self
-        
+        viewModel.didLoad()
+    }
+    
+    private func setupNavigationBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .black // Цвет фона навигационной панели
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white] // Цвет текста заголовка
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white] // Цвет текста большого заголовка
+
         navigationItem.searchController = searchController
-        navigationItem.hidesBackButton = true
-        navigationItem.title = "Weather"
         navigationItem.hidesSearchBarWhenScrolling = false
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(showMenu))
-        
+        navigationItem.title = "Weather"
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
         
-        view.backgroundColor = .systemCyan
-        
+        // Убираем кнопку "Back"
+        navigationItem.setHidesBackButton(true, animated: false)
+    }
+    
+    private func setupTableView() {
+        view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -79,51 +87,64 @@ class SearchViewController: UIViewController {
         ])
     }
     
-    @objc func showMenu() {
-        print("Show Menu")
+    private func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
+        
+        searchController.searchBar.searchTextField.textColor = .white
+        searchController.searchBar.searchTextField.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        searchController.searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "Search for a city or airport",
+            attributes: [.foregroundColor: UIColor.lightGray]
+        )
     }
 }
 
-// MARK: UITableViewDataSource
+// MARK: - UITableViewDataSource
 extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.getInfoData().count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as? CityTableViewCell
-        else { return UITableViewCell() }
-        cell.setup(model: viewModel.getInfoData()[indexPath.row])
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as? CityTableViewCell else {
+            return UITableViewCell()
+        }
+        let model = viewModel.getInfoData()[indexPath.row]
+        cell.setup(model: model)
         return cell
     }
 }
 
-// MARK: UITableViewDelegate
+// MARK: - UITableViewDelegate
 extension SearchViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let infoModel = viewModel.getInfoData()[indexPath.row]
-        delegate?.citySelectedByUser(model: infoModel)
+        let selectedModel = viewModel.getInfoData()[indexPath.row]
+        delegate?.citySelectedByUser(model: selectedModel)
         navigationController?.popViewController(animated: true)
     }
 }
 
-// MARK: UISearchBarDelegate
+// MARK: - UISearchBarDelegate
 extension SearchViewController: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-        viewModel.searchedData(data: searchBar.text ?? "")
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.searchedData(data: searchText)
     }
 }
 
-// MARK: UISearchResultsUpdating
+// MARK: - UISearchResultsUpdating
 extension SearchViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        viewModel.searchedData(data: searchController.searchBar.text ?? "")
+        guard let searchText = searchController.searchBar.text else { return }
+        viewModel.searchedData(data: searchText)
     }
 }
 
-// MARK: SearchViewModelDelegate
+// MARK: - SearchViewModelDelegate
 extension SearchViewController: SearchViewModelDelegate {
     func dataLoaded() {
-        tableView.reloadData()
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
     }
 }

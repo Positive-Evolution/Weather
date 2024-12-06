@@ -1,7 +1,11 @@
 import UIKit
+import AVFoundation
 
 class CityView: UIView {
     
+    private var player: AVPlayer?
+    private var playerLayer: AVPlayerLayer?
+
     private lazy var cityNamelabel: UILabel = {
         let name = UILabel()
         name.font = UIFont.systemFont(ofSize: 20, weight: .bold)
@@ -69,8 +73,18 @@ class CityView: UIView {
     private func commonInit() {
         self.backgroundColor = UIColor(red: 35/255.0, green: 78/255.0, blue: 119/255.0, alpha: 1.0)
         layer.cornerRadius = 20
+        layer.masksToBounds = true
+        setupVideoLayer()
         setupSubViews()
         setupConstraints()
+    }
+    
+    private func setupVideoLayer() {
+        playerLayer = AVPlayerLayer()
+        playerLayer?.videoGravity = .resizeAspectFill
+        if let playerLayer = playerLayer {
+            layer.insertSublayer(playerLayer, at: 0)
+        }
     }
     
     private func setupSubViews() {
@@ -111,5 +125,62 @@ class CityView: UIView {
         cityTemperaturelabel.text = "\(model.temperature)°"
         cityHighTemperaturelabel.text = "H: \(model.highTemperature)°"
         cityLowTemperaturelabel.text = "L: \(model.lowTemperature)°"
+        updateBackgroundVideo(for: model.description)
+    }
+    
+    private func updateBackgroundVideo(for condition: String) {
+        let videoName: String
+        switch condition.lowercased() {
+        case "rain":
+            videoName = "rain"
+        case "cloudy":
+            videoName = "cloudy"
+        case "clear":
+            videoName = "clear"
+        case "snow":
+            videoName = "snow"
+        default:
+            videoName = "default"
+        }
+        
+        guard let path = Bundle.main.path(forResource: videoName, ofType: "mp4") else {
+            print("Видео не найдено: \(videoName)")
+            return
+        }
+        
+        let url = URL(fileURLWithPath: path)
+        let playerItem = AVPlayerItem(url: url)
+        
+        if player == nil {
+            player = AVPlayer(playerItem: playerItem)
+            playerLayer?.player = player
+        } else {
+            player?.replaceCurrentItem(with: playerItem)
+        }
+        
+        // Подписка на окончание видео
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(videoDidEnd),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem
+        )
+        
+        player?.play()
+    }
+    
+    @objc private func videoDidEnd() {
+        player?.seek(to: .zero)
+        player?.play()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        playerLayer?.frame = bounds
+    }
+    
+    func stopVideoPlayback() {
+        player?.pause()
+        NotificationCenter.default.removeObserver(self)
     }
 }
