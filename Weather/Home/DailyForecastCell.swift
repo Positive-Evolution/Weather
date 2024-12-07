@@ -4,6 +4,13 @@ class DailyForecastCell: UITableViewCell {
     
     static let identifier = "DailyForecastCell"
     
+    private let containerView: UIView = {
+        let view = UIView()
+        view.layer.masksToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let dayLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -31,7 +38,7 @@ class DailyForecastCell: UITableViewCell {
     private let progressBar: UIProgressView = {
         let progressView = UIProgressView(progressViewStyle: .default)
         progressView.tintColor = UIColor.systemBlue
-        progressView.trackTintColor = UIColor(white: 1.0, alpha: 0.2)
+        progressView.trackTintColor = UIColor(white: 1.0, alpha: 0.4)
         progressView.translatesAutoresizingMaskIntoConstraints = false
         return progressView
     }()
@@ -56,29 +63,35 @@ class DailyForecastCell: UITableViewCell {
     }
     
     private func setupSubviews() {
-        contentView.addSubview(dayLabel)
-        contentView.addSubview(iconImageView)
-        contentView.addSubview(tempRangeLabel)
-        contentView.addSubview(progressBar)
-        contentView.addSubview(precipitationLabel)
+        contentView.addSubview(containerView)
+        containerView.addSubview(dayLabel)
+        containerView.addSubview(iconImageView)
+        containerView.addSubview(tempRangeLabel)
+        containerView.addSubview(progressBar)
+        containerView.addSubview(precipitationLabel)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            dayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            dayLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            containerView.topAnchor.constraint(equalTo: topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            dayLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            dayLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             iconImageView.leadingAnchor.constraint(equalTo: dayLabel.trailingAnchor, constant: 16),
-            iconImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            iconImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 24),
             iconImageView.heightAnchor.constraint(equalToConstant: 24),
             
-            tempRangeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            tempRangeLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            tempRangeLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            tempRangeLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             progressBar.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
             progressBar.trailingAnchor.constraint(equalTo: tempRangeLabel.leadingAnchor, constant: -16),
-            progressBar.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            progressBar.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             progressBar.heightAnchor.constraint(equalToConstant: 4),
             
             precipitationLabel.trailingAnchor.constraint(equalTo: progressBar.trailingAnchor),

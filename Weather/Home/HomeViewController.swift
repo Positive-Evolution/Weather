@@ -20,6 +20,15 @@ class HomeViewController: UIViewController, SearchViewControllerDelegate {
         return forecastView
     }()
     
+    private lazy var dailyForecastContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(white: 1.0, alpha: 0.2) // Прозрачный фон
+        view.layer.cornerRadius = 10
+        view.layer.masksToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private lazy var dailyForecastTableView: DailyForecastTableView = {
         let tableView = DailyForecastTableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -72,7 +81,8 @@ class HomeViewController: UIViewController, SearchViewControllerDelegate {
     private func setupUI() {
         view.addSubview(weatherView)
         view.addSubview(hourlyForecastView)
-        view.addSubview(dailyForecastTableView)
+        view.addSubview(dailyForecastContainerView) // Добавляем контейнер
+        dailyForecastContainerView.addSubview(dailyForecastTableView) // Таблица внутри контейнера
         view.addSubview(mapButton)
         view.addSubview(searchButton)
     }
@@ -85,12 +95,17 @@ class HomeViewController: UIViewController, SearchViewControllerDelegate {
             hourlyForecastView.topAnchor.constraint(equalTo: weatherView.bottomAnchor, constant: 260),
             hourlyForecastView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 2),
             hourlyForecastView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -2),
-            hourlyForecastView.heightAnchor.constraint(equalToConstant: 100), // Высота для предсказания
+            hourlyForecastView.heightAnchor.constraint(equalToConstant: 100),
             
-            dailyForecastTableView.topAnchor.constraint(equalTo: hourlyForecastView.bottomAnchor, constant: 20),
-            dailyForecastTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            dailyForecastTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            dailyForecastTableView.heightAnchor.constraint(equalToConstant: 250), // Высота таблицы
+            dailyForecastContainerView.topAnchor.constraint(equalTo: hourlyForecastView.bottomAnchor, constant: 20),
+            dailyForecastContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            dailyForecastContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            dailyForecastContainerView.heightAnchor.constraint(equalToConstant: 250), // Высота таблицы
+            
+            dailyForecastTableView.topAnchor.constraint(equalTo: dailyForecastContainerView.topAnchor),
+            dailyForecastTableView.leadingAnchor.constraint(equalTo: dailyForecastContainerView.leadingAnchor),
+            dailyForecastTableView.trailingAnchor.constraint(equalTo: dailyForecastContainerView.trailingAnchor),
+            dailyForecastTableView.bottomAnchor.constraint(equalTo: dailyForecastContainerView.bottomAnchor),
             
             mapButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             mapButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
